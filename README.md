@@ -1,4 +1,4 @@
-# flag PCR optical duplicates
+# Flag PCR and optical duplicates
 
 Author: Allison E Mann
 Email: allison.e.mann@ou.edu
