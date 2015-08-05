@@ -1,6 +1,4 @@
-###############################
-Flag Optical and PCR duplicates
-###############################
+# flag PCR and optical duplicates
 
 Author: Allison E Mann
 Email: allison.e.mann@ou.edu
