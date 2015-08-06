@@ -17,6 +17,7 @@ import pandas as pd
 from pandas import DataFrame
 import sys
 import numpy as np
+import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.font_manager import FontProperties
 
@@ -91,7 +92,6 @@ def find_pcr_opt_dups(dups):
 					optDups.append(records['record'][sin])
 				fin += 1
 				sin += 1
-				break		
 			else:
 				print "Records do not match critiera:"
 				print records['record'][fin]
@@ -109,7 +109,7 @@ def find_pcr_opt_dups(dups):
 			print >> optOut, record
 	optOut.close()
 	next = raw_input("Generate tile figures?: ")
-	if y in next:
+	if 'y' in next:
 		plotOpticalDups()
 	else:
 		print "Complete, no figures generated"
@@ -152,16 +152,16 @@ def plotOpticalDups():
 		colorDict = {}
 		currentGroup = tileGroups.get_group(tiles[git])
 		currentName = currentGroup.tile[0]
-		x = currentGroup.x.tolist()
-		y = currentGroup.y.tolist()
+		x = map(int, currentGroup.x.tolist())
+		y = map(int, currentGroup.y.tolist())
 		for i in range(0, len(currentGroup.sampleID.unique())):
 			colorDict[currentGroup.sampleID.unique()[i]] = matplotlib.colors.cnames.values()[i]
 		#loop to create figures		
 		fig = plt.figure(1)
-		for i in x:
-			plt.scatter(x, y, color=colorDict.values(), marker=',')
+		for i in range(0, len(x)):
+			plt.scatter(x, y, color=colorDict.values(), marker='o')
 		markers = [plt.Line2D([0,0], [0,0], color=color, marker='o', linestyle='') for color in colorDict.values()]
-		lgd = plt.legend(markers, colorDict.keys(), numpoints=1, prop=fontP, bbox_to_anchor=90.5, -0.1), ncol=5, fancybox=True)
+		lgd = plt.legend(markers, colorDict.keys(), numpoints=1, prop=fontP, bbox_to_anchor=(0.5, -0.1), ncol=5, fancybox=True)
 		fig.savefig(currentName, bbox_extra_artists=(lgd,), bbox_inches='tight')
 		git += 1	
 
