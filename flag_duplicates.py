@@ -10,7 +10,7 @@ Usage: python flag_duplicates.py sorted.sam
 Output files include a list of nonduplicated records, PCR duplicate records (only first instance), 
 optical duplicate records, and a crosstabulation of duplicate record groups per sample. Most common
 sample per record group (eg most likely origin of duplicate) may be printed to sys.out by uncommenting
-region in script.
+region in script. Optionally will generate scatterplots for optical duplicate tiles.
 """
 
 import pandas as pd
@@ -96,7 +96,6 @@ def find_pcr_opt_dups(dups):
 				print "Records do not match critiera:"
 				print records['record'][fin]
 				print records['record'][sin]
-	print "Complete!"
 	print "Found %i PCR duplicates" % len(pcrDups)
 	print "Found %i optical duplicates" % len(optDups)
 
@@ -108,11 +107,15 @@ def find_pcr_opt_dups(dups):
 		for record in optDups:
 			print >> optOut, record
 	optOut.close()
-	next = raw_input("Generate tile figures?: ")
-	if 'y' in next:
-		plotOpticalDups()
-	else:
-		print "Complete, no figures generated"
+	
+	#if optical duplicates detected, make figures?
+	if len(optDups) >= 1:
+		next = raw_input("Generate tile figures?: ")
+		if 'y' in next:
+			plotOpticalDups()
+		else:
+			print "Complete, no figures generated"
+
 
 
 def plotOpticalDups():
@@ -156,10 +159,10 @@ def plotOpticalDups():
 		y = map(int, currentGroup.y.tolist())
 		for i in range(0, len(currentGroup.sampleID.unique())):
 			colorDict[currentGroup.sampleID.unique()[i]] = matplotlib.colors.cnames.values()[i]
-		#loop to create figures		
-		fig = plt.figure(1)
-		for i in range(0, len(x)):
-			plt.scatter(x, y, color=colorDict.values(), marker='o')
+		#loop to create figures	
+		fig = plt.figure()
+		plt.scatter(x, y, color=colorDict.values(), marker='o')
+		plt.grid()
 		markers = [plt.Line2D([0,0], [0,0], color=color, marker='o', linestyle='') for color in colorDict.values()]
 		lgd = plt.legend(markers, colorDict.keys(), numpoints=1, prop=fontP, bbox_to_anchor=(0.5, -0.1), ncol=5, fancybox=True)
 		fig.savefig(currentName, bbox_extra_artists=(lgd,), bbox_inches='tight')
