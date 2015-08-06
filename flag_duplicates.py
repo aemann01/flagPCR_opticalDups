@@ -17,6 +17,8 @@ import pandas as pd
 from pandas import DataFrame
 import sys
 import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.font_manager import FontProperties
 
 def find_pcr_opt_dups(dups):
 	"""From a dataframe generated using read_sam_get_nondups splits putative PCR duplicates from
@@ -106,6 +108,62 @@ def find_pcr_opt_dups(dups):
 		for record in optDups:
 			print >> optOut, record
 	optOut.close()
+	next = raw_input("Generate tile figures?: ")
+	if y in next:
+		plotOpticalDups()
+	else:
+		print "Complete, no figures generated"
+
+
+def plotOpticalDups():
+	#read in optical duplicates file, extract info
+	data = []
+	with open("optical_duplicates.txt", "r") as f:
+		for line in f:
+			if not line.strip():
+				continue
+			else:
+				try:
+					optRecord = line.split()
+					t = optRecord[2]
+				except IndexError:
+					break
+				optRecord = line.split()
+				read = optRecord[0].split(":")
+				tile = read[4]
+				x = read[5]
+				y = read[6]
+				sampleID = read[0]
+				data.append([tile, sampleID, x, y])
+			dfOptDups = DataFrame(data)
+			dfOptDups.columns = ['tile', 'sampleID', 'x', 'y']
+	tileGroups = dfOptDups.groupby('tile')
+	tiles = []
+	for name, group in tileGroups:
+		tiles.append(name)
+	
+	#initalize values
+	git = 0 #group iterator
+	fontP = FontProperties()
+	fontP.set_size('small')
+
+	#get colors, x y values for group
+	for i in range(0, len(tiles)):
+		colorDict = {}
+		currentGroup = tileGroups.get_group(tiles[git])
+		currentName = currentGroup.tile[0]
+		x = currentGroup.x.tolist()
+		y = currentGroup.y.tolist()
+		for i in range(0, len(currentGroup.sampleID.unique())):
+			colorDict[currentGroup.sampleID.unique()[i]] = matplotlib.colors.cnames.values()[i]
+		#loop to create figures		
+		fig = plt.figure(1)
+		for i in x:
+			plt.scatter(x, y, color=colorDict.values(), marker=',')
+		markers = [plt.Line2D([0,0], [0,0], color=color, marker='o', linestyle='') for color in colorDict.values()]
+		lgd = plt.legend(markers, colorDict.keys(), numpoints=1, prop=fontP, bbox_to_anchor=90.5, -0.1), ncol=5, fancybox=True)
+		fig.savefig(currentName, bbox_extra_artists=(lgd,), bbox_inches='tight')
+		git += 1	
 
 
 def read_sam_get_nondups(inputfile):
