@@ -2,15 +2,7 @@
 
 """Simple script that reads in a genome start site sorted sam file and filters for nonduplicated and
 duplicated records. Duplicated records are further split into PCR duplicates and optical duplicates
-(e.g. barcoding errors due to sequence proximity on Illumina chip). Optical duplicates are defined
-as records with the same genome start site on the same reference with the same tile and cigar string
-that fall within 100 pixels in both the y and x coordinates as defined by the read header. Input file
-must have sample ID as first field ie: sample1:911:HJNNYADXX:2:2215:16157:7489
 Usage: python flag_duplicates.py sorted.sam
-Output files include a list of nonduplicated records, PCR duplicate records (only first instance), 
-optical duplicate records, and a crosstabulation of duplicate record groups per sample. Most common
-sample per record group (eg most likely origin of duplicate) may be printed to sys.out by uncommenting
-region in script. Optionally will generate scatterplots for optical duplicate tiles.
 """
 
 import pandas as pd
