@@ -51,7 +51,7 @@ def find_pcr_opt_dups(dups):
 	
 	#process duplicate records
 	nit = 0
-	print "Processing possible optical duplicates"
+	print "Processing possible optical duplicates..."
 	for i in range(0, len(possibleOptNames)):
 		xvals = dupGroup.get_group(possibleOptNames[nit]).sort('x')['x'].reset_index()
 		yvals = dupGroup.get_group(possibleOptNames[nit]).sort('x')['y'].reset_index()
@@ -102,6 +102,7 @@ def find_pcr_opt_dups(dups):
 	
 	#if optical duplicates detected, make figures?
 	if len(optDups) >= 1:
+		print "-----------------------"
 		next = raw_input("Generate tile figures?: ")
 		if 'y' in next:
 			plotOpticalDups()
@@ -159,6 +160,7 @@ def plotOpticalDups():
 		lgd = plt.legend(markers, colorDict.keys(), numpoints=1, prop=fontP, bbox_to_anchor=(0.5, -0.1), ncol=5, fancybox=True)
 		fig.savefig(currentName, bbox_extra_artists=(lgd,), bbox_inches='tight')
 		git += 1	
+	print "Complete! Figures successfully generated"
 
 
 def read_sam_get_nondups(inputfile):
@@ -190,7 +192,6 @@ def read_sam_get_nondups(inputfile):
 				data.append([tileCig, ref, start, x, y, sampleID, line])
 		dfSam = DataFrame(data)
 		print "Found %i records in %s" % (len(dfSam), inputfile)
-	
 	print "Finding nondupicated records..."
 	nondupsOut = "nonduplicates.txt"
 
@@ -205,6 +206,13 @@ def read_sam_get_nondups(inputfile):
 
 
 def main():
+	print """
+  ___ _             ___            _ _         _          
+ | __| |__ _ __ _  |   \ _  _ _ __| (_)__ __ _| |_ ___ ___
+ | _|| / _` / _` | | |) | || | '_ \ | / _/ _` |  _/ -_|_-<
+ |_| |_\__,_\__, | |___/ \_,_| .__/_|_\__\__,_|\__\___/__/
+            |___/            |_|                          
+	"""
 	inputfile = sys.argv[1]
 	read_sam_get_nondups(inputfile)
 
