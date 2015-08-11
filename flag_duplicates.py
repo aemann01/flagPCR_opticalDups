@@ -1,6 +1,6 @@
 #!/usr/local/bin/python
 
-"""Simple script that reads in a genome start site sorted sam file and filters for nonduplicated and
+"""Reads in a genome start site sorted sam file and filters for nonduplicated and
 duplicated records. Duplicated records are further split into PCR duplicates and optical duplicates
 Usage: python flag_duplicates.py sorted.sam
 """
@@ -12,9 +12,9 @@ import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.font_manager import FontProperties
-import csv
+import os
 
-def find_pcr_opt_dups(dups):
+def find_pcr_opt_dups(dups, pixDist):
 	#From a dataframe generated using read_sam_get_nondups splits putative PCR duplicates from putative optical duplicates
 	#initalize empty lists
 	optDups = []
@@ -201,7 +201,16 @@ def read_sam_get_nondups(inputfile):
 		for line in nondups:
 			f.write(line)
 	dups = dfSam[dfSam['count'] > 1]
-	find_pcr_opt_dups(dups)
+	
+
+	#set pixel distance
+	print "-----------------------"
+	next = raw_input("Set pixel distance to value other than default (100)? ")
+	if 'y' in next:
+		pixDist = raw_input("New pixel distance: ")
+	else:
+		pixDist = 100
+	find_pcr_opt_dups(dups, pixDist)
 
 
 def main():
@@ -212,7 +221,12 @@ def main():
  |_| |_\__,_\__, | |___/ \_,_| .__/_|_\__\__,_|\__\___/__/
             |___/            |_|                          
 	"""
+	print "Usage: python flag_duplicates.py input.sam \n"
+	if len(sys.argv) != 2:
+		print "Error! No sam file specified"
+		sys.exit(1)
 	inputfile = sys.argv[1]
+	assert os.path.exists(inputfile), 'File does not exist: %s. Do you need to provide the path?' %inputfile
 	read_sam_get_nondups(inputfile)
 
 main()
