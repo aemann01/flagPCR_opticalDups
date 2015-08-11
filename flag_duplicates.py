@@ -12,11 +12,10 @@ import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.font_manager import FontProperties
+import csv
 
 def find_pcr_opt_dups(dups):
-	"""From a dataframe generated using read_sam_get_nondups splits putative PCR duplicates from
-	putative optical duplicates
-	"""
+	#From a dataframe generated using read_sam_get_nondups splits putative PCR duplicates from putative optical duplicates
 	#initalize empty lists
 	optDups = []
 	pcrDups = []
@@ -93,11 +92,11 @@ def find_pcr_opt_dups(dups):
 
 	with open("pcr_duplicates.txt", "w") as pcrOut:
 		for record in pcrDups:
-			print >> pcrOut, record
+			pcrOut.write(record)
 	pcrOut.close()
 	with open("optical_duplicates.txt", "w") as optOut:
 		for record in optDups:
-			print >> optOut, record
+			optOut.write(record)
 	optOut.close()
 	
 	#if optical duplicates detected, make figures?
@@ -164,8 +163,7 @@ def plotOpticalDups():
 
 
 def read_sam_get_nondups(inputfile):
-	"""Loads and extracts data from sorted sam file
-	"""
+	#Loads and extracts data from sorted sam file
 	data = []
 	with open(inputfile, "r") as f:
 		print "Reading in %s..." % inputfile
@@ -175,7 +173,6 @@ def read_sam_get_nondups(inputfile):
 				t=record[2]
 			except IndexError:
 				break
-	
 			if line.startswith("@"):
 				pass
 			else:
@@ -193,14 +190,16 @@ def read_sam_get_nondups(inputfile):
 		dfSam = DataFrame(data)
 		print "Found %i records in %s" % (len(dfSam), inputfile)
 	print "Finding nondupicated records..."
-	nondupsOut = "nonduplicates.txt"
 
 	dfSam.columns = ['tileCig', 'ref', 'start', 'x', 'y', 'sampleID', 'record']
 	dfSam['count'] = dfSam.groupby('start')['start'].transform('count')
-
-	nondups = dfSam[dfSam['count'] == 1]
+	
+	nondups = dfSam[dfSam['count'] == 1]['record']
 	print "Found %i nonduplicated samples" % len(nondups)
-	nondups.record.to_csv(nondupsOut, index=False, header=False)
+
+	with open("nonduplicates.txt", "w") as f:
+		for line in nondups:
+			f.write(line)
 	dups = dfSam[dfSam['count'] > 1]
 	find_pcr_opt_dups(dups)
 
