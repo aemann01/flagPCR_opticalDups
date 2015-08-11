@@ -32,13 +32,6 @@ def find_pcr_opt_dups(dups, pixDist):
 			sameSamp = dupGroup.get_group(name)['record'].reset_index()
 			pcrDups.append(sameSamp['record'][0]) #only keeps first instance of the duplicate
 		else:
-			#Uncomment print statements to get most common sample per duplicate group
-			#print "---------------------"
-			#print "Duplicates in group:"
-			#print name, "\n"
-			#print "Most likely from this sample:"
-			#print grouped_samples.value_counts().idxmax() #most common id in group (will not work if counts are equal across samples)
-			#print "---------------------"
 			possibleOptNames.append(name)
 
 	#get crosstab table by sample per bin group
@@ -108,8 +101,6 @@ def find_pcr_opt_dups(dups, pixDist):
 		else:
 			print "Complete, no figures generated"
 
-
-
 def plotOpticalDups():
 	#read in optical duplicates file, extract info
 	data = []
@@ -149,18 +140,22 @@ def plotOpticalDups():
 		currentName = currentGroup.tile[0]
 		x = map(int, currentGroup.x.tolist())
 		y = map(int, currentGroup.y.tolist())
+		xnorm = [float(i)/sum(x) for i in x]
+		ynorm = [float(i)/sum(y) for i in y]
 		for i in range(0, len(currentGroup.sampleID.unique())):
 			colorDict[currentGroup.sampleID.unique()[i]] = matplotlib.colors.cnames.values()[i]
 		#loop to create figures	
 		fig = plt.figure()
-		plt.scatter(x, y, color=colorDict.values(), marker='o')
-		plt.grid()
+		ax = fig.add_subplot(111, axisbg='black')
+		ax.scatter(xnorm, ynorm, color=colorDict.values(), marker='o', s=10, alpha=0.5)
+		plt.xlim(0, 1.0)
+		plt.ylim(0, 1.0)
+		plt.grid(color="white")
 		markers = [plt.Line2D([0,0], [0,0], color=color, marker='o', linestyle='') for color in colorDict.values()]
 		lgd = plt.legend(markers, colorDict.keys(), numpoints=1, prop=fontP, bbox_to_anchor=(0.5, -0.1), ncol=5, fancybox=True)
 		fig.savefig(currentName, bbox_extra_artists=(lgd,), bbox_inches='tight')
 		git += 1	
 	print "Complete! Figures successfully generated"
-
 
 def read_sam_get_nondups(inputfile):
 	#Loads and extracts data from sorted sam file
@@ -211,7 +206,6 @@ def read_sam_get_nondups(inputfile):
 	else:
 		pixDist = 100
 	find_pcr_opt_dups(dups, pixDist)
-
 
 def main():
 	print """
