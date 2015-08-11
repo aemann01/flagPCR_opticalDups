@@ -142,18 +142,20 @@ def plotOpticalDups():
 		y = map(int, currentGroup.y.tolist())
 		xnorm = [float(i)/sum(x) for i in x]
 		ynorm = [float(i)/sum(y) for i in y]
+		
 		for i in range(0, len(currentGroup.sampleID.unique())):
 			colorDict[currentGroup.sampleID.unique()[i]] = matplotlib.colors.cnames.values()[i]
 		#loop to create figures	
 		fig = plt.figure()
-		ax = fig.add_subplot(111, axisbg='black')
-		ax.scatter(xnorm, ynorm, color=colorDict.values(), marker='o', s=10, alpha=0.5)
+		almostBlack = '#262626'
+		ax = fig.add_subplot(111, axisbg=almostBlack)
+		ax.scatter(xnorm, ynorm, color=colorDict.values(), marker=',', s=5, alpha=0.5, edgecolor='black', linewidth=0.15)
 		plt.xlim(0, 1.0)
 		plt.ylim(0, 1.0)
 		plt.grid(color="white")
-		markers = [plt.Line2D([0,0], [0,0], color=color, marker='o', linestyle='') for color in colorDict.values()]
+		markers = [plt.Line2D([0,0], [0,0], color=color, marker='s', linestyle='') for color in colorDict.values()]
 		lgd = plt.legend(markers, colorDict.keys(), numpoints=1, prop=fontP, bbox_to_anchor=(0.5, -0.1), ncol=5, fancybox=True)
-		fig.savefig(currentName, bbox_extra_artists=(lgd,), bbox_inches='tight')
+		fig.savefig(currentName + '.pdf', bbox_extra_artists=(lgd,), bbox_inches='tight', format='pdf')
 		git += 1	
 	print "Complete! Figures successfully generated"
 
