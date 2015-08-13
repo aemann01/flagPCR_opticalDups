@@ -147,11 +147,16 @@ def plotOpticalDups():
 			colorDict[currentGroup.sampleID.unique()[i]] = matplotlib.colors.cnames.values()[i]
 		#loop to create figures	
 		fig = plt.figure()
-		almostBlack = '#262626'
+		almostBlack = '#847F7F'
 		ax = fig.add_subplot(111, axisbg=almostBlack)
-		ax.scatter(xnorm, ynorm, color=colorDict.values(), marker=',', s=5, alpha=0.5, edgecolor='black', linewidth=0.15)
+		ax.scatter(xnorm, ynorm, color=colorDict.values(), marker=',', s=5)
+		ax.spines['top'].set_visible(False) #remove plot borders
+		ax.spines['right'].set_visible(False)
+		ax.spines['bottom'].set_visible(False)
+		ax.spines['left'].set_visible(False)
 		plt.xlim(0, 1.0)
 		plt.ylim(0, 1.0)
+		plt.tick_params(bottom='off', top='off', right='off', left='off') #no tick marks
 		plt.grid(color="white")
 		markers = [plt.Line2D([0,0], [0,0], color=color, marker='s', linestyle='') for color in colorDict.values()]
 		lgd = plt.legend(markers, colorDict.keys(), numpoints=1, prop=fontP, bbox_to_anchor=(0.5, -0.1), ncol=5, fancybox=True)
