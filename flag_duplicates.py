@@ -13,6 +13,13 @@ import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.font_manager import FontProperties
 import os
+import random
+
+#print colored text to screen (should work linux, OS X, and windows -- only tested on linux)
+class bcolors:
+	WARNING = '\033[91m'
+	COMPLETE = '\033[92m'
+	
 
 def find_pcr_opt_dups(dups, pixDist):
 	#From a dataframe generated using read_sam_get_nondups splits putative PCR duplicates from putative optical duplicates
@@ -99,7 +106,7 @@ def find_pcr_opt_dups(dups, pixDist):
 		if 'y' in next:
 			plotOpticalDups()
 		else:
-			print "Complete, no figures generated"
+			print bcolors.COMPLETE + "Complete, no figures generated"
 
 def plotOpticalDups():
 	#read in optical duplicates file, extract info
@@ -144,11 +151,11 @@ def plotOpticalDups():
 		ynorm = [float(i)/sum(y) for i in y]
 		
 		for i in range(0, len(currentGroup.sampleID.unique())):
-			colorDict[currentGroup.sampleID.unique()[i]] = matplotlib.colors.cnames.values()[i]
+			colorDict[currentGroup.sampleID.unique()[i]] = matplotlib.colors.cnames.values()[random.randrange(1, 150)] #link random color to each sample
 		#loop to create figures	
 		fig = plt.figure()
-		almostBlack = '#847F7F'
-		ax = fig.add_subplot(111, axisbg=almostBlack)
+		backgroundColor = '#B9B9B9'
+		ax = fig.add_subplot(111, axisbg=backgroundColor)
 		ax.scatter(xnorm, ynorm, color=colorDict.values(), marker=',', s=5)
 		ax.spines['top'].set_visible(False) #remove plot borders
 		ax.spines['right'].set_visible(False)
@@ -162,7 +169,7 @@ def plotOpticalDups():
 		lgd = plt.legend(markers, colorDict.keys(), numpoints=1, prop=fontP, bbox_to_anchor=(0.5, -0.1), ncol=5, fancybox=True)
 		fig.savefig(currentName + '.pdf', bbox_extra_artists=(lgd,), bbox_inches='tight', format='pdf')
 		git += 1	
-	print "Complete! Figures successfully generated"
+	print bcolors.COMPLETE + "Complete! Figures successfully generated"
 
 def read_sam_get_nondups(inputfile):
 	#Loads and extracts data from sorted sam file
@@ -204,6 +211,10 @@ def read_sam_get_nondups(inputfile):
 			f.write(line)
 	dups = dfSam[dfSam['count'] > 1]
 	
+	if len(nondups) == len(dfSam): #break if no duplicates are found
+		print "-----------------------"
+		print bcolors.WARNING + "Exit: No duplicated records found, is your sam file sorted?"
+		sys.exit(1)
 
 	#set pixel distance
 	print "-----------------------"
@@ -221,13 +232,13 @@ def main():
  | _|| / _` / _` | | |) | || | '_ \ | / _/ _` |  _/ -_|_-<
  |_| |_\__,_\__, | |___/ \_,_| .__/_|_\__\__,_|\__\___/__/
             |___/            |_|                          
-	"""
+	""" 
 	print "Usage: python flag_duplicates.py input.sam \n"
 	if len(sys.argv) != 2:
-		print "Error! No sam file specified"
+		print bcolors.WARNING + "Error! No sam file specified"
 		sys.exit(1)
 	inputfile = sys.argv[1]
-	assert os.path.exists(inputfile), 'File does not exist: %s. Do you need to provide the path?' %inputfile
+	assert os.path.exists(inputfile), bcolors.WARNING + 'Error! File does not exist: %s. Is the path correct?' %inputfile
 	read_sam_get_nondups(inputfile)
 
 main()
