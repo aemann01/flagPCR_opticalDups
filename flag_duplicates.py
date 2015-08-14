@@ -20,7 +20,6 @@ class bcolors:
 	WARNING = '\033[91m'
 	COMPLETE = '\033[92m'
 	
-
 def find_pcr_opt_dups(dups, pixDist):
 	#From a dataframe generated using read_sam_get_nondups splits putative PCR duplicates from putative optical duplicates
 	#initalize empty lists
@@ -174,6 +173,7 @@ def plotOpticalDups():
 def read_sam_get_nondups(inputfile):
 	#Loads and extracts data from sorted sam file
 	data = []
+	header = []
 	with open(inputfile, "r") as f:
 		print "Reading in %s..." % inputfile
 		for line in f:
@@ -183,7 +183,7 @@ def read_sam_get_nondups(inputfile):
 			except IndexError:
 				break
 			if line.startswith("@"):
-				pass
+				header.append(line)
 			else:
 				record = line.split()
 				ref = record[2]
@@ -207,6 +207,7 @@ def read_sam_get_nondups(inputfile):
 	print "Found %i nonduplicated samples" % len(nondups)
 
 	with open("nonduplicates.txt", "w") as f:
+		f.write(''.join(header)) #add header to nonduplicates file
 		for line in nondups:
 			f.write(line)
 	dups = dfSam[dfSam['count'] > 1]
