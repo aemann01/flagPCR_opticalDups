@@ -1,8 +1,6 @@
 #!/usr/local/bin/python
 
-"""Reads in a genome start site sorted sam file and filters for nonduplicated and
-duplicated records. Duplicated records are further split into PCR duplicates and optical duplicates
-Usage: python flag_duplicates.py sorted.sam
+"""Reads in a sam file and filters for nonduplicated and duplicated records. Duplicated records are further split into PCR duplicates and optical duplicates. Usage: python flag_duplicates.py sorted.sam
 """
 
 import pandas as pd
@@ -11,8 +9,8 @@ import sys
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
-from matplotlib.font_manager import FontProperties
 import os
+from matplotlib.font_manager import FontProperties
 import random
 
 #print colored text to screen (should work linux, OS X, and windows -- only tested on linux)
@@ -171,7 +169,7 @@ def plotOpticalDups():
 	print bcolors.COMPLETE + "Complete! Figures successfully generated"
 
 def read_sam_get_nondups(inputfile):
-	#Loads and extracts data from sorted sam file
+	#Loads and extracts data from sam file
 	data = []
 	header = []
 	with open(inputfile, "r") as f:
@@ -214,7 +212,7 @@ def read_sam_get_nondups(inputfile):
 	
 	if len(nondups) == len(dfSam): #break if no duplicates are found
 		print "-----------------------"
-		print bcolors.WARNING + "Exit: No duplicated records found, is your sam file sorted?"
+		print bcolors.WARNING + "Exit: No duplicated records found"
 		sys.exit(1)
 
 	#set pixel distance
@@ -234,6 +232,7 @@ def main():
  |_| |_\__,_\__, | |___/ \_,_| .__/_|_\__\__,_|\__\___/__/
             |___/            |_|                          
 	""" 
+	print "Author: Allison E Mann (allison.e.mann@ou.edu)"
 	print "Usage: python flag_duplicates.py input.sam \n"
 	if len(sys.argv) != 2:
 		print bcolors.WARNING + "Error! No sam file specified"
