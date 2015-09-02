@@ -232,7 +232,7 @@ def main():
  |_| |_\__,_\__, | |___/ \_,_| .__/_|_\__\__,_|\__\___/__/
             |___/            |_|                          
 	""" 
-	print "Author: Allison E Mann (allison.e.mann@ou.edu)"
+	print "Author: Allison E Mann (aemann01@ou.edu)"
 	print "Usage: python flag_duplicates.py input.sam \n"
 	if len(sys.argv) != 2:
 		print bcolors.WARNING + "Error! No sam file specified"
