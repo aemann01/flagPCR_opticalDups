@@ -151,7 +151,7 @@ def plotOpticalDups():
 			colorDict[currentGroup.sampleID.unique()[i]] = matplotlib.colors.cnames.values()[random.randrange(1, 150)] #link random color to each sample
 		#loop to create figures	
 		fig = plt.figure()
-		backgroundColor = '#B9B9B9'
+		backgroundColor = '#ffffff'
 		ax = fig.add_subplot(111, axisbg=backgroundColor)
 		ax.scatter(xnorm, ynorm, color=colorDict.values(), marker=',', s=5)
 		ax.spines['top'].set_visible(False) #remove plot borders
