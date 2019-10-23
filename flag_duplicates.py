@@ -1,4 +1,4 @@
-#!/usr/local/bin/python
+#!/usr/local/env python
 
 """Reads in a sam file and filters for nonduplicated and duplicated records. Duplicated records are further split into PCR duplicates and optical duplicates. Usage: python flag_duplicates.py sorted.sam
 """
@@ -13,40 +13,29 @@ import os
 from matplotlib.font_manager import FontProperties
 import random
 
-#print colored text to screen (should work linux, OS X, and windows -- only tested on linux)
-class bcolors:
+class bcolors: #print colored text to screen (should work linux, OS X, and windows -- only tested on linux)
 	WARNING = '\033[91m'
 	COMPLETE = '\033[92m'
 	
-def find_pcr_opt_dups(dups, pixDist):
-	#From a dataframe generated using read_sam_get_nondups splits putative PCR duplicates from putative optical duplicates
-	#initalize empty lists
+def find_pcr_opt_dups(dups, pixDist): #From a dataframe generated using read_sam_get_nondups splits putative PCR duplicates from putative optical duplicates
 	optDups = []
 	pcrDups = []
-	possibleOptNames = []
-	
-	#add bin groups and group dataframe
-	dupsBin = dups.assign(bin_group = dups['tileCig'] + dups['ref'])
+	possibleOptNames = [] 
+	dupsBin = dups.assign(bin_group = dups['tileCig'] + dups['ref']) #add bin groups and group dataframe
 	dupGroup = dupsBin.groupby(['bin_group', 'start'], as_index=False)
-
-	#if there are duplicates but all from same sample == PCR duplicate, else add group name to list
-	for name, group in dupGroup:
+	for name, group in dupGroup: #if there are duplicates but all from same sample == PCR duplicate, else add group name to list
 		grouped_samples = dupGroup.get_group(name)['sampleID']
 		if len(grouped_samples.unique()) == 1:
 			sameSamp = dupGroup.get_group(name)['record'].reset_index()
 			pcrDups.append(sameSamp['record'][0]) #only keeps first instance of the duplicate
 		else:
 			possibleOptNames.append(name)
-
-	#get crosstab table by sample per bin group
-	dupsGroup_counts = dups.assign(duplicates = dups['tileCig'] + "_" + dups['ref'] + "_" + dups['start'])
+	dupsGroup_counts = dups.assign(duplicates = dups['tileCig'] + "_" + dups['ref'] + "_" + dups['start']) #get crosstab table by sample per bin group
 	count_table = pd.crosstab([dupsGroup_counts.ref, dupsGroup_counts.start, dupsGroup_counts.tileCig], dupsGroup_counts.sampleID, margins=True)
 	with open("count_table.txt", "w") as countTable:
 		count_table.to_csv(countTable)
 	countTable.close()
-	
-	#process duplicate records
-	nit = 0
+	nit = 0 #process duplicate records
 	print "Processing possible optical duplicates..."
 	for i in range(0, len(possibleOptNames)):
 		xvals = dupGroup.get_group(possibleOptNames[nit]).sort('x')['x'].reset_index()
@@ -55,13 +44,11 @@ def find_pcr_opt_dups(dups, pixDist):
 		nit += 1
 		fin = 0
 		sin = 1
-
 		for k in range(0, len(xvals)):
 			try:
 				t = xvals['x'][sin] #if you have reached last record break the loop
 			except KeyError:
 				break
-
 			xi = xvals['x'][fin]
 			xj = xvals['x'][sin]
 			yi = yvals['y'][fin]
@@ -86,7 +73,6 @@ def find_pcr_opt_dups(dups, pixDist):
 				print records['record'][sin]
 	print "Found %i PCR duplicates" % len(pcrDups)
 	print "Found %i optical duplicates" % len(optDups)
-
 	with open("pcr_duplicates.txt", "w") as pcrOut:
 		for record in pcrDups:
 			pcrOut.write(record)
@@ -95,9 +81,7 @@ def find_pcr_opt_dups(dups, pixDist):
 		for record in optDups:
 			optOut.write(record)
 	optOut.close()
-	
-	#if optical duplicates detected, make figures?
-	if len(optDups) >= 1:
+	if len(optDups) >= 1: #if optical duplicates detected, make figures?
 		print "-----------------------"
 		next = raw_input("Generate tile figures?: ")
 		if 'y' in next:
@@ -105,8 +89,7 @@ def find_pcr_opt_dups(dups, pixDist):
 		else:
 			print bcolors.COMPLETE + "Complete, no figures generated"
 
-def plotOpticalDups():
-	#read in optical duplicates file, extract info
+def plotOpticalDups(): #read in optical duplicates file, extract info
 	data = []
 	with open("optical_duplicates.txt", "r") as f:
 		for line in f:
@@ -131,14 +114,10 @@ def plotOpticalDups():
 	tiles = []
 	for name, group in tileGroups:
 		tiles.append(name)
-	
-	#initalize values
-	git = 0 #group iterator
+	git = 0 
 	fontP = FontProperties()
 	fontP.set_size('small')
-
-	#get colors, x y values for group
-	for i in range(0, len(tiles)):
+	for i in range(0, len(tiles)): #get colors, x y values for group
 		colorDict = {}
 		currentGroup = tileGroups.get_group(tiles[git])
 		currentName = currentGroup.tile[0]
@@ -146,11 +125,9 @@ def plotOpticalDups():
 		y = map(int, currentGroup.y.tolist())
 		xnorm = [float(i)/sum(x) for i in x]
 		ynorm = [float(i)/sum(y) for i in y]
-		
 		for i in range(0, len(currentGroup.sampleID.unique())):
 			colorDict[currentGroup.sampleID.unique()[i]] = matplotlib.colors.cnames.values()[random.randrange(1, 150)] #link random color to each sample
-		#loop to create figures	
-		fig = plt.figure()
+		fig = plt.figure() #loop to create figures
 		backgroundColor = '#ffffff'
 		ax = fig.add_subplot(111, axisbg=backgroundColor)
 		ax.scatter(xnorm, ynorm, color=colorDict.values(), marker=',', s=5)
@@ -168,8 +145,7 @@ def plotOpticalDups():
 		git += 1	
 	print bcolors.COMPLETE + "Complete! Figures successfully generated"
 
-def read_sam_get_nondups(inputfile):
-	#Loads and extracts data from sam file
+def read_sam_get_nondups(inputfile): #Loads and extracts data from sam file
 	data = []
 	header = []
 	with open(inputfile, "r") as f:
@@ -197,27 +173,21 @@ def read_sam_get_nondups(inputfile):
 		dfSam = DataFrame(data)
 		print "Found %i records in %s" % (len(dfSam), inputfile)
 	print "Finding nondupicated records..."
-
 	dfSam.columns = ['tileCig', 'ref', 'start', 'x', 'y', 'sampleID', 'record']
 	dfSam['count'] = dfSam.groupby('start')['start'].transform('count')
-	
 	nondups = dfSam[dfSam['count'] == 1]['record']
 	print "Found %i nonduplicated samples" % len(nondups)
-
 	with open("nonduplicates.txt", "w") as f:
 		f.write(''.join(header)) #add header to nonduplicates file
 		for line in nondups:
 			f.write(line)
 	dups = dfSam[dfSam['count'] > 1]
-	
 	if len(nondups) == len(dfSam): #break if no duplicates are found
 		print "-----------------------"
 		print bcolors.WARNING + "Exit: No duplicated records found"
 		sys.exit(1)
-
-	#set pixel distance
-	print "-----------------------"
-	next = raw_input("Set pixel distance to value other than default (100)? ")
+	print "-----------------------" 
+	next = raw_input("Set pixel distance to value other than default (100)? ") #set pixel distance
 	if 'y' in next:
 		pixDist = raw_input("New pixel distance: ")
 	else:
@@ -232,8 +202,6 @@ def main():
  |_| |_\__,_\__, | |___/ \_,_| .__/_|_\__\__,_|\__\___/__/
             |___/            |_|                          
 	""" 
-	print "Author: Allison E Mann (aemann01@ou.edu)"
-	print "Usage: python flag_duplicates.py input.sam \n"
 	if len(sys.argv) != 2:
 		print bcolors.WARNING + "Error! No sam file specified"
 		sys.exit(1)
@@ -243,18 +211,7 @@ def main():
 
 main()
 
-	
-		
-
-	
-		
-
-
-
-
-		
-	
-
-
-		
-
+__author__ = "Allison E. Mann"
+__license__ = "GPL"
+__version__ = "1.0.1"
+__email__="allison.e.mann@gmail.com"
