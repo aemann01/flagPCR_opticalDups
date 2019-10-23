@@ -1,4 +1,4 @@
-#!/usr/local/env python
+#!/usr/local/env python2.7
 
 """Reads in a sam file and filters for nonduplicated and duplicated records. Duplicated records are further split into PCR duplicates and optical duplicates. Usage: python flag_duplicates.py sorted.sam
 """
